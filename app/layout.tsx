@@ -14,14 +14,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider>
-      <html lang="es" className={`${geist.variable} h-full`}>
-        <body className="flex min-h-full flex-col antialiased bg-gray-50 text-gray-900">
+    <html lang="es" className={`${geist.variable} h-full`}>
+      <body className="flex min-h-full flex-col antialiased bg-gray-50 text-gray-900">
+        <ClerkProvider>
           <Navbar />
           <main className="flex-1">{children}</main>
           <Footer />
-        </body>
-      </html>
-    </ClerkProvider>
+        </ClerkProvider>
+      </body>
+    </html>
   );
 }

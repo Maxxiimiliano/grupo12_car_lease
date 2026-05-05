@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { Show, UserButton } from "@clerk/nextjs";
 import { Car, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -42,17 +42,17 @@ export default function Navbar() {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
-          <SignedOut>
+          <Show when="signed-out">
             <Button variant="outline" size="sm" asChild>
               <Link href="/sign-in">Iniciar sesión</Link>
             </Button>
             <Button size="sm" asChild>
               <Link href="/sign-up">Registrarse</Link>
             </Button>
-          </SignedOut>
-          <SignedIn>
-            <UserButton afterSignOutUrl="/" />
-          </SignedIn>
+          </Show>
+          <Show when="signed-in">
+            <UserButton />
+          </Show>
         </div>
 
         {/* Mobile menu toggle */}
@@ -74,17 +74,17 @@ export default function Navbar() {
               {label}
             </Link>
           ))}
-          <SignedOut>
+          <Show when="signed-out">
             <Button variant="outline" size="sm" asChild>
               <Link href="/sign-in">Iniciar sesión</Link>
             </Button>
             <Button size="sm" asChild>
               <Link href="/sign-up">Registrarse</Link>
             </Button>
-          </SignedOut>
-          <SignedIn>
-            <UserButton afterSignOutUrl="/" />
-          </SignedIn>
+          </Show>
+          <Show when="signed-in">
+            <UserButton />
+          </Show>
         </div>
       )}
     </header>
