@@ -18,11 +18,12 @@ interface VehicleCardProps {
   seats: number;
   available: boolean;
   imageUrl: string;
+  priority?: boolean;
 }
 
 export default function VehicleCard({
   id, brand, model, year, pricePerDay,
-  category, fuelType, transmission, seats, available, imageUrl,
+  category, fuelType, transmission, seats, available, imageUrl, priority = false,
 }: VehicleCardProps) {
   return (
     <Card className="flex flex-col overflow-hidden hover:shadow-md transition-shadow">
@@ -33,6 +34,7 @@ export default function VehicleCard({
           fill
           className="object-cover"
           sizes="(max-width: 768px) 100vw, 33vw"
+          priority={priority}
         />
         {!available && (
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">

@@ -42,5 +42,5 @@ export async function POST(req: Request) {
     cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/${reservation.id}`,
   });
 
-  return NextResponse.json({ sessionId: session.id });
+  return NextResponse.json({ sessionId: session.id, url: session.url });
 }

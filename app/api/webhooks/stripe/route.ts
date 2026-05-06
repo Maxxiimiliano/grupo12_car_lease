@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
+import { sendReservationConfirmation } from "@/lib/email";
+import { formatCurrency, formatDate } from "@/lib/utils";
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -22,9 +24,10 @@ export async function POST(req: Request) {
     const reservationId = session.metadata?.reservationId;
 
     if (reservationId) {
-      await prisma.reservation.update({
+      const reservation = await prisma.reservation.update({
         where: { id: reservationId },
         data: { status: "CONFIRMED" },
+        include: { vehicle: true, user: true },
       });
 
       await prisma.payment.upsert({
@@ -39,6 +42,18 @@ export async function POST(req: Request) {
         },
         update: { status: "SUCCESS", paidAt: new Date() },
       });
+
+      if (reservation.user.email) {
+        await sendReservationConfirmation({
+          to: reservation.user.email,
+          customerName: reservation.user.name ?? reservation.user.email,
+          vehicleName: `${reservation.vehicle.brand} ${reservation.vehicle.model}`,
+          startDate: formatDate(reservation.startDate),
+          endDate: formatDate(reservation.endDate),
+          totalPrice: formatCurrency(Number(reservation.totalPrice)),
+          reservationId: reservation.id,
+        }).catch(() => {}); // don't fail the webhook if email errors
+      }
     }
   }
 

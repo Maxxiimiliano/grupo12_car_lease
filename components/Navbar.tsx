@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Show, UserButton } from "@clerk/nextjs";
-import { Car, Menu, X } from "lucide-react";
+import { Show, UserButton, useUser } from "@clerk/nextjs";
+import { Car, Menu, Settings, X } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -16,6 +16,8 @@ const navLinks = [
 export default function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { user } = useUser();
+  const isAdmin = user?.publicMetadata?.role === "admin";
 
   return (
     <header className="sticky top-0 z-40 border-b border-gray-200 bg-white/95 backdrop-blur">
@@ -39,6 +41,18 @@ export default function Navbar() {
               {label}
             </Link>
           ))}
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className={cn(
+                "text-sm font-medium transition-colors hover:text-blue-600 flex items-center gap-1",
+                pathname.startsWith("/admin") ? "text-blue-600" : "text-gray-600"
+              )}
+            >
+              <Settings className="h-4 w-4" />
+              Admin
+            </Link>
+          )}
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
@@ -74,6 +88,16 @@ export default function Navbar() {
               {label}
             </Link>
           ))}
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className="text-sm font-medium text-gray-700 flex items-center gap-1"
+              onClick={() => setOpen(false)}
+            >
+              <Settings className="h-4 w-4" />
+              Admin
+            </Link>
+          )}
           <Show when="signed-out">
             <Button variant="outline" size="sm" asChild>
               <Link href="/sign-in">Iniciar sesión</Link>

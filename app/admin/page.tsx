@@ -8,10 +8,13 @@ export default async function AdminDashboard() {
     prisma.vehicle.count(),
     prisma.user.count(),
     prisma.reservation.findMany({ where: { status: { not: "CANCELLED" } } }),
-    prisma.payment.findMany({ where: { status: "SUCCESS" } }),
+    prisma.payment.aggregate({
+      _sum: { amount: true },
+      where: { status: "SUCCESS", reservation: { status: "CONFIRMED" } },
+    }),
   ]);
 
-  const totalRevenue = payments.reduce((s, p) => s + Number(p.amount), 0);
+  const totalRevenue = Number(payments._sum.amount ?? 0);
   const confirmedReservations = reservations.filter((r) => r.status === "CONFIRMED").length;
 
   const recentReservations = await prisma.reservation.findMany({

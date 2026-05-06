@@ -2,12 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { loadStripe } from "@stripe/stripe-js";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
 import { CreditCard, Loader2, Lock } from "lucide-react";
-
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 interface Props {
   reservationId: string;
@@ -32,11 +29,8 @@ export default function CheckoutForm({ reservationId, amount }: Props) {
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Error al procesar el pago."); return; }
 
-      const stripe = await stripePromise;
-      if (!stripe) { setError("Error al cargar Stripe."); return; }
-
-      const { error: stripeError } = await stripe.redirectToCheckout({ sessionId: data.sessionId });
-      if (stripeError) setError(stripeError.message ?? "Error en el pago.");
+      if (!data.url) { setError("No se pudo obtener la URL de pago."); return; }
+      window.location.href = data.url;
     } catch {
       setError("Error de conexión. Inténtalo de nuevo.");
     } finally {

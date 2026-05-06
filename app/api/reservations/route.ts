@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { diffInDays } from "@/lib/utils";
 
@@ -52,11 +52,14 @@ export async function POST(req: Request) {
   const days = diffInDays(start, end);
   const totalPrice = days * Number(vehicle.pricePerDay);
 
-  // Ensure user exists in our DB (synced from Clerk via webhook or on-the-fly)
+  // Ensure user exists in our DB — fetch real data from Clerk if not yet synced
+  const clerkUser = await (await clerkClient()).users.getUser(userId);
+  const email = clerkUser.emailAddresses[0]?.emailAddress ?? "";
+  const name = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") || null;
   await prisma.user.upsert({
     where: { id: userId },
-    create: { id: userId, email: `${userId}@clerk.user` },
-    update: {},
+    create: { id: userId, email, name, avatarUrl: clerkUser.imageUrl ?? null },
+    update: { email, name, avatarUrl: clerkUser.imageUrl ?? null },
   });
 
   const reservation = await prisma.reservation.create({

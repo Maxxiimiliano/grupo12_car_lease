@@ -35,7 +35,7 @@ async function VehicleGrid({ searchParams }: { searchParams: SearchParams }) {
 
   return (
     <>
-      {vehicles.map((v) => (
+      {vehicles.map((v, i) => (
         <VehicleCard
           key={v.id}
           id={v.id}
@@ -49,6 +49,7 @@ async function VehicleGrid({ searchParams }: { searchParams: SearchParams }) {
           seats={v.seats}
           available={v.available}
           imageUrl={v.imageUrl}
+          priority={i === 0}
         />
       ))}
     </>

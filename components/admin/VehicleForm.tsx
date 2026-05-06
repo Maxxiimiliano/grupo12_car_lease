@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { ImagePlus, Loader2, X } from "lucide-react";
 
 const CATEGORIES = ["Turismo", "SUV", "Furgoneta", "Deportivo", "Eléctrico", "Compacto"];
 const FUEL_TYPES = ["Gasolina", "Diésel", "Híbrido", "Eléctrico"];
@@ -44,7 +46,31 @@ export default function VehicleForm({ initialData, onClose }: Props) {
     }
   );
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!);
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        { method: "POST", body: formData }
+      );
+      const data = await res.json();
+      if (data.secure_url) set("imageUrl", data.secure_url);
+      else setError("Error al subir la imagen.");
+    } catch {
+      setError("Error al subir la imagen.");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const set = (key: keyof VehicleFormData, value: unknown) =>
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -133,8 +159,36 @@ export default function VehicleForm({ initialData, onClose }: Props) {
       </div>
 
       <div className="space-y-1">
-        <Label>URL de imagen</Label>
-        <Input value={form.imageUrl} onChange={(e) => set("imageUrl", e.target.value)} placeholder="https://..." />
+        <Label>Imagen</Label>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          onChange={handleImageUpload}
+        />
+        {form.imageUrl ? (
+          <div className="relative w-full h-40 rounded-lg overflow-hidden border border-gray-200">
+            <Image src={form.imageUrl} alt="Imagen del vehículo" fill className="object-cover" sizes="(max-width: 768px) 100vw, 600px" />
+            <button
+              type="button"
+              onClick={() => set("imageUrl", "")}
+              className="absolute top-2 right-2 bg-white rounded-full p-1 shadow hover:bg-gray-100"
+            >
+              <X className="h-4 w-4 text-gray-600" />
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="w-full h-40 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center gap-2 text-gray-400 hover:border-blue-400 hover:text-blue-500 transition-colors disabled:opacity-50"
+          >
+            {uploading ? <Loader2 className="h-8 w-8 animate-spin" /> : <ImagePlus className="h-8 w-8" />}
+            <span className="text-sm">{uploading ? "Subiendo imagen..." : "Haz clic para subir una imagen"}</span>
+          </button>
+        )}
       </div>
 
       <div className="space-y-1">

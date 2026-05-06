@@ -4,7 +4,7 @@ import { formatDate } from "@/lib/utils";
 
 export default async function AdminUsersPage() {
   const users = await prisma.user.findMany({
-    include: { _count: { select: { reservations: true } } },
+    include: { _count: { select: { reservations: { where: { status: { not: "CANCELLED" } } } } } },
     orderBy: { createdAt: "desc" },
   });
 
@@ -20,7 +20,7 @@ export default async function AdminUsersPage() {
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Usuario</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Email</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Rol</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Reservas</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Reservas activas</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Registrado</th>
               </tr>
             </thead>

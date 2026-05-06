@@ -1,103 +1,106 @@
-import { PrismaClient } from "../app/generated/prisma";
+import { PrismaClient } from "../app/generated/prisma/client";
+import { PrismaNeon } from "@prisma/adapter-neon";
+import * as dotenv from "dotenv";
 
-const prisma = new PrismaClient();
+dotenv.config({ path: ".env.local" });
+
+const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL! });
+const prisma = new PrismaClient({ adapter } as never);
 
 const vehicles = [
   {
-    brand: "Toyota", model: "Corolla", year: 2023, pricePerDay: 45,
+    brand: "Toyota", model: "Corolla", year: 2022, pricePerDay: 45,
     category: "Turismo", fuelType: "Híbrido", transmission: "Automático",
     seats: 5, available: true,
-    description: "El Toyota Corolla híbrido ofrece eficiencia superior y comodidad urbana. Ideal para ciudad y carretera.",
-    imageUrl: "https://images.unsplash.com/photo-1617469767808-42539fcb7e3c?w=800",
+    description: "Sedán híbrido eficiente y cómodo, ideal para ciudad y carretera.",
+    imageUrl: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=800",
   },
   {
-    brand: "Volkswagen", model: "Golf", year: 2022, pricePerDay: 50,
-    category: "Turismo", fuelType: "Gasolina", transmission: "Manual",
+    brand: "Volkswagen", model: "Golf", year: 2023, pricePerDay: 52,
+    category: "Compacto", fuelType: "Gasolina", transmission: "Manual",
     seats: 5, available: true,
-    description: "Compacto premium con excelente maniobrabilidad. Perfecto para desplazamientos urbanos y viajes cortos.",
+    description: "Hatchback compacto con excelente maniobrabilidad en ciudad.",
     imageUrl: "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=800",
   },
   {
-    brand: "BMW", model: "X5", year: 2023, pricePerDay: 140,
+    brand: "BMW", model: "X5", year: 2023, pricePerDay: 120,
     category: "SUV", fuelType: "Diésel", transmission: "Automático",
-    seats: 5, available: true,
-    description: "SUV de lujo con potente motor diésel y tracción total. Para quienes exigen lo mejor en cada trayecto.",
+    seats: 7, available: true,
+    description: "SUV premium con gran espacio y prestaciones deportivas.",
     imageUrl: "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800",
   },
   {
-    brand: "Tesla", model: "Model 3", year: 2024, pricePerDay: 120,
-    category: "Eléctrico", fuelType: "Eléctrico", transmission: "Automático",
-    seats: 5, available: true,
-    description: "Sedán 100% eléctrico con 560 km de autonomía. Tecnología puntera y cero emisiones.",
-    imageUrl: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=800",
-  },
-  {
-    brand: "Ford", model: "Transit", year: 2022, pricePerDay: 80,
-    category: "Furgoneta", fuelType: "Diésel", transmission: "Manual",
+    brand: "Mercedes-Benz", model: "Vito", year: 2021, pricePerDay: 95,
+    category: "Furgoneta", fuelType: "Diésel", transmission: "Automático",
     seats: 9, available: true,
-    description: "Furgoneta de 9 plazas perfecta para grupos y viajes familiares. Gran capacidad de carga.",
+    description: "Furgoneta espaciosa para grupos o transporte de carga.",
     imageUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800",
   },
   {
-    brand: "Porsche", model: "911", year: 2023, pricePerDay: 250,
-    category: "Deportivo", fuelType: "Gasolina", transmission: "Automático",
-    seats: 2, available: true,
-    description: "Icono deportivo con más de 450 CV. Experiencia de conducción única en cada curva.",
-    imageUrl: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800",
+    brand: "Audi", model: "A3", year: 2023, pricePerDay: 75,
+    category: "Turismo", fuelType: "Gasolina", transmission: "Automático",
+    seats: 5, available: true,
+    description: "Berlina premium compacta con tecnología de última generación.",
+    imageUrl: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=800",
+  },
+  {
+    brand: "Renault", model: "Clio", year: 2022, pricePerDay: 38,
+    category: "Compacto", fuelType: "Gasolina", transmission: "Manual",
+    seats: 5, available: true,
+    description: "Urbano económico perfecto para desplazamientos diarios.",
+    imageUrl: "https://images.unsplash.com/photo-1502877338535-766e1452684a?w=800",
+  },
+  {
+    brand: "Tesla", model: "Model 3", year: 2023, pricePerDay: 110,
+    category: "Eléctrico", fuelType: "Eléctrico", transmission: "Automático",
+    seats: 5, available: true,
+    description: "Sedán eléctrico premium con tecnología Autopilot y cero emisiones.",
+    imageUrl: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=800",
+  },
+  {
+    brand: "Ford", model: "Kuga", year: 2022, pricePerDay: 78,
+    category: "SUV", fuelType: "Híbrido", transmission: "Automático",
+    seats: 5, available: true,
+    description: "SUV híbrido familiar con gran maletero y confort.",
+    imageUrl: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=800",
   },
   {
     brand: "Seat", model: "Ibiza", year: 2023, pricePerDay: 35,
     category: "Compacto", fuelType: "Gasolina", transmission: "Manual",
     seats: 5, available: true,
-    description: "Compacto español económico y versátil. Ideal para ciudad con bajo consumo de combustible.",
+    description: "Compacto urbano económico y ágil, ideal para la ciudad.",
     imageUrl: "https://images.unsplash.com/photo-1502877338535-766e1452684a?w=800",
   },
   {
-    brand: "Hyundai", model: "Tucson", year: 2022, pricePerDay: 70,
+    brand: "Porsche", model: "Cayenne", year: 2022, pricePerDay: 180,
+    category: "Deportivo", fuelType: "Gasolina", transmission: "Automático",
+    seats: 5, available: true,
+    description: "SUV deportivo de lujo con potencia y elegancia incomparables.",
+    imageUrl: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800",
+  },
+  {
+    brand: "Peugeot", model: "Traveller", year: 2021, pricePerDay: 88,
+    category: "Furgoneta", fuelType: "Diésel", transmission: "Automático",
+    seats: 8, available: true,
+    description: "Minivan de 8 plazas cómoda para viajes en grupo.",
+    imageUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800",
+  },
+  {
+    brand: "Hyundai", model: "Tucson", year: 2023, pricePerDay: 82,
     category: "SUV", fuelType: "Híbrido", transmission: "Automático",
     seats: 5, available: true,
-    description: "SUV familiar híbrido con diseño moderno y amplio maletero. Equilibrio perfecto entre eficiencia y espacio.",
+    description: "SUV híbrido moderno con diseño innovador y tecnología avanzada.",
     imageUrl: "https://images.unsplash.com/photo-1619682817481-e994891cd1f5?w=800",
-  },
-  {
-    brand: "Mercedes", model: "Clase A", year: 2023, pricePerDay: 90,
-    category: "Turismo", fuelType: "Gasolina", transmission: "Automático",
-    seats: 5, available: true,
-    description: "Compacto premium de Mercedes con tecnología MBUX y acabados de lujo.",
-    imageUrl: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=800",
-  },
-  {
-    brand: "Renault", model: "Zoe", year: 2022, pricePerDay: 55,
-    category: "Eléctrico", fuelType: "Eléctrico", transmission: "Automático",
-    seats: 5, available: true,
-    description: "Urbano eléctrico con 395 km de autonomía. La opción más accesible para movilidad sostenible.",
-    imageUrl: "https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800",
-  },
-  {
-    brand: "Audi", model: "A3", year: 2023, pricePerDay: 85,
-    category: "Turismo", fuelType: "Gasolina", transmission: "Automático",
-    seats: 5, available: false,
-    description: "Berlina premium con interior refinado y sistema de infoentretenimiento MMI avanzado.",
-    imageUrl: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=800",
-  },
-  {
-    brand: "Kia", model: "Sportage", year: 2023, pricePerDay: 65,
-    category: "SUV", fuelType: "Híbrido", transmission: "Automático",
-    seats: 5, available: true,
-    description: "SUV coreano con diseño futurista y garantía de 7 años. Alto equipamiento de serie.",
-    imageUrl: "https://images.unsplash.com/photo-1609752232649-35bfb3f9e9dd?w=800",
   },
 ];
 
 async function main() {
   console.log("Seeding database...");
   await prisma.vehicle.deleteMany();
-
   for (const v of vehicles) {
     await prisma.vehicle.create({ data: v });
   }
-
-  console.log(`Created ${vehicles.length} vehicles.`);
+  console.log(`✓ Created ${vehicles.length} vehicles.`);
 }
 
 main()
