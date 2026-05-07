@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 
 const navLinks = [
   { href: "/vehicles", label: "Vehículos" },
+  { href: "/sale", label: "En venta" },
   { href: "/my-reservations", label: "Mis reservas" },
 ];
 

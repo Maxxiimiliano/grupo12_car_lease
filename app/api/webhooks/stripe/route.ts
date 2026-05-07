@@ -21,9 +21,16 @@ export async function POST(req: Request) {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
+    const type = session.metadata?.type;
+    const vehicleId = session.metadata?.vehicleId;
     const reservationId = session.metadata?.reservationId;
 
-    if (reservationId) {
+    if (type === "purchase" && vehicleId) {
+      await prisma.vehicle.update({
+        where: { id: vehicleId },
+        data: { forSale: false, available: false },
+      });
+    } else if (reservationId) {
       const reservation = await prisma.reservation.update({
         where: { id: reservationId },
         data: { status: "CONFIRMED" },

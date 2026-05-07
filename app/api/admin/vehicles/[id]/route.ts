@@ -23,6 +23,9 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       fuelType: data.fuelType, transmission: data.transmission,
       seats: data.seats, available: data.available,
       description: data.description, imageUrl: data.imageUrl,
+      mileage: data.mileage ?? 0,
+      forSale: data.forSale ?? false,
+      salePrice: data.forSale && data.salePrice ? data.salePrice : null,
     },
   });
   return NextResponse.json(vehicle);

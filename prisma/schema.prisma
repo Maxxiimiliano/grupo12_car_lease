@@ -49,6 +49,9 @@ model Vehicle {
   available    Boolean       @default(true)
   description  String
   imageUrl     String
+  mileage      Int           @default(0)
+  forSale      Boolean       @default(false)
+  salePrice    Decimal?      @db.Decimal(10, 2)
   updatedAt    DateTime      @updatedAt
   reservations Reservation[]
   reviews      Review[]

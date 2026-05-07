@@ -1,8 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
+import ToggleRoleButton from "@/components/admin/ToggleRoleButton";
+import { auth } from "@clerk/nextjs/server";
 
 export default async function AdminUsersPage() {
+  const { userId: currentUserId } = await auth();
+
   const users = await prisma.user.findMany({
     include: { _count: { select: { reservations: { where: { status: { not: "CANCELLED" } } } } } },
     orderBy: { createdAt: "desc" },
@@ -22,6 +26,7 @@ export default async function AdminUsersPage() {
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Rol</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Reservas activas</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Registrado</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -36,6 +41,11 @@ export default async function AdminUsersPage() {
                   </td>
                   <td className="px-4 py-3 text-gray-600">{u._count.reservations}</td>
                   <td className="px-4 py-3 text-gray-500">{formatDate(u.createdAt)}</td>
+                  <td className="px-4 py-3">
+                    {u.id !== currentUserId && (
+                      <ToggleRoleButton userId={u.id} currentRole={u.role} />
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

@@ -4,13 +4,21 @@ import { formatCurrency } from "@/lib/utils";
 import { Car, CreditCard, TrendingUp, Users } from "lucide-react";
 
 export default async function AdminDashboard() {
-  const [totalVehicles, totalUsers, reservations, payments] = await Promise.all([
+  const [totalVehicles, totalUsers, reservations, payments, topVehicles] = await Promise.all([
     prisma.vehicle.count(),
     prisma.user.count(),
     prisma.reservation.findMany({ where: { status: { not: "CANCELLED" } } }),
     prisma.payment.aggregate({
       _sum: { amount: true },
       where: { status: "SUCCESS", reservation: { status: "CONFIRMED" } },
+    }),
+    prisma.vehicle.findMany({
+      include: {
+        _count: { select: { reservations: { where: { status: "CONFIRMED" } } } },
+        reviews: { select: { rating: true } },
+      },
+      orderBy: { reservations: { _count: "desc" } },
+      take: 5,
     }),
   ]);
 
@@ -48,43 +56,80 @@ export default async function AdminDashboard() {
         ))}
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Reservas recientes</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-100 text-left text-gray-500">
-                  <th className="pb-2 font-medium">Cliente</th>
-                  <th className="pb-2 font-medium">Vehículo</th>
-                  <th className="pb-2 font-medium">Estado</th>
-                  <th className="pb-2 font-medium text-right">Total</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {recentReservations.map((r) => (
-                  <tr key={r.id} className="py-2">
-                    <td className="py-2 text-gray-700">{r.user.name ?? "—"}</td>
-                    <td className="py-2 text-gray-700">{r.vehicle.brand} {r.vehicle.model}</td>
-                    <td className="py-2">
-                      <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                        r.status === "CONFIRMED" ? "bg-green-100 text-green-700"
-                        : r.status === "CANCELLED" ? "bg-red-100 text-red-700"
-                        : "bg-yellow-100 text-yellow-700"
-                      }`}>
-                        {r.status === "CONFIRMED" ? "Confirmada" : r.status === "CANCELLED" ? "Cancelada" : "Pendiente"}
-                      </span>
-                    </td>
-                    <td className="py-2 text-right font-medium">{formatCurrency(Number(r.totalPrice))}</td>
+      <div className="grid lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Reservas recientes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100 text-left text-gray-500">
+                    <th className="pb-2 font-medium">Cliente</th>
+                    <th className="pb-2 font-medium">Vehículo</th>
+                    <th className="pb-2 font-medium">Estado</th>
+                    <th className="pb-2 font-medium text-right">Total</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {recentReservations.map((r) => (
+                    <tr key={r.id} className="py-2">
+                      <td className="py-2 text-gray-700">{r.user.name ?? "—"}</td>
+                      <td className="py-2 text-gray-700">{r.vehicle.brand} {r.vehicle.model}</td>
+                      <td className="py-2">
+                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                          r.status === "CONFIRMED" ? "bg-green-100 text-green-700"
+                          : r.status === "CANCELLED" ? "bg-red-100 text-red-700"
+                          : "bg-yellow-100 text-yellow-700"
+                        }`}>
+                          {r.status === "CONFIRMED" ? "Confirmada" : r.status === "CANCELLED" ? "Cancelada" : "Pendiente"}
+                        </span>
+                      </td>
+                      <td className="py-2 text-right font-medium">{formatCurrency(Number(r.totalPrice))}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Vehículos más reservados</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100 text-left text-gray-500">
+                    <th className="pb-2 font-medium">Vehículo</th>
+                    <th className="pb-2 font-medium text-center">Reservas</th>
+                    <th className="pb-2 font-medium text-center">Valoración</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {topVehicles.map((v) => {
+                    const avg = v.reviews.length > 0
+                      ? (v.reviews.reduce((s, r) => s + r.rating, 0) / v.reviews.length).toFixed(1)
+                      : "—";
+                    return (
+                      <tr key={v.id}>
+                        <td className="py-2 font-medium text-gray-800">{v.brand} {v.model}</td>
+                        <td className="py-2 text-center text-gray-600">{v._count.reservations}</td>
+                        <td className="py-2 text-center text-yellow-600">
+                          {avg !== "—" ? `★ ${avg}` : "—"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

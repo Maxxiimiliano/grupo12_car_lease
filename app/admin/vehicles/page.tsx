@@ -45,6 +45,7 @@ export default async function AdminVehiclesPage() {
                       pricePerDay: Number(v.pricePerDay), category: v.category,
                       fuelType: v.fuelType, transmission: v.transmission, seats: v.seats,
                       available: v.available, description: v.description, imageUrl: v.imageUrl,
+                      mileage: v.mileage, forSale: v.forSale, salePrice: Number(v.salePrice ?? 0),
                     }} />
                   </td>
                 </tr>

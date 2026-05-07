@@ -27,6 +27,9 @@ export interface VehicleFormData {
   available: boolean;
   description: string;
   imageUrl: string;
+  mileage: number;
+  forSale: boolean;
+  salePrice: number;
 }
 
 interface Props {
@@ -43,6 +46,7 @@ export default function VehicleForm({ initialData, onClose }: Props) {
       brand: "", model: "", year: new Date().getFullYear(), pricePerDay: 50,
       category: "Turismo", fuelType: "Gasolina", transmission: "Manual",
       seats: 5, available: true, description: "", imageUrl: "",
+      mileage: 0, forSale: false, salePrice: 0,
     }
   );
   const [loading, setLoading] = useState(false);
@@ -158,6 +162,23 @@ export default function VehicleForm({ initialData, onClose }: Props) {
         </div>
       </div>
 
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <Label>Kilometraje (km)</Label>
+          <Input type="number" min={0} value={form.mileage} onChange={(e) => set("mileage", +e.target.value)} required />
+        </div>
+        <div className="space-y-1">
+          <Label>Precio de venta (€)</Label>
+          <Input
+            type="number" min={0} step={0.01}
+            value={form.salePrice}
+            onChange={(e) => set("salePrice", +e.target.value)}
+            disabled={!form.forSale}
+            placeholder={form.forSale ? "Precio de venta" : "Activa 'En venta' primero"}
+          />
+        </div>
+      </div>
+
       <div className="space-y-1">
         <Label>Imagen</Label>
         <input
@@ -202,15 +223,27 @@ export default function VehicleForm({ initialData, onClose }: Props) {
         />
       </div>
 
-      <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          id="available"
-          checked={form.available}
-          onChange={(e) => set("available", e.target.checked)}
-          className="h-4 w-4 rounded border-gray-300 text-blue-600"
-        />
-        <Label htmlFor="available">Disponible para reservar</Label>
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="available"
+            checked={form.available}
+            onChange={(e) => set("available", e.target.checked)}
+            className="h-4 w-4 rounded border-gray-300 text-blue-600"
+          />
+          <Label htmlFor="available">Disponible para reservar</Label>
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="forSale"
+            checked={form.forSale}
+            onChange={(e) => set("forSale", e.target.checked)}
+            className="h-4 w-4 rounded border-gray-300 text-green-600"
+          />
+          <Label htmlFor="forSale">En venta</Label>
+        </div>
       </div>
 
       {error && <p className="text-sm text-red-500">{error}</p>}
