@@ -11,7 +11,11 @@ const CATEGORIES = ["Turismo", "SUV", "Furgoneta", "Deportivo", "Eléctrico", "C
 const FUEL_TYPES = ["Gasolina", "Diésel", "Híbrido", "Eléctrico"];
 const TRANSMISSIONS = ["Manual", "Automático"];
 
-export default function VehicleFilters() {
+interface Props {
+  cities: string[];
+}
+
+export default function VehicleFilters({ cities }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -33,6 +37,22 @@ export default function VehicleFilters() {
 
   return (
     <aside className="space-y-5 w-full">
+      {cities.length > 0 && (
+        <div className="space-y-1.5">
+          <Label>Ciudad / Oficina</Label>
+          <Select
+            value={searchParams.get("city") ?? "all"}
+            onValueChange={(v) => updateParam("city", v)}
+          >
+            <SelectTrigger><SelectValue placeholder="Todas las ciudades" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas las ciudades</SelectItem>
+              {cities.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
       <div className="space-y-1.5">
         <Label>Categoría</Label>
         <Select

@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { sendVisitRequest } from "@/lib/email";
 
 export async function POST(req: Request) {
-  const { vehicleId, officeId, customerName, customerEmail, customerPhone, preferredDate, message } =
+  const { vehicleId, officeId, name: customerName, email: customerEmail, phone: customerPhone, preferredDate, message } =
     await req.json();
 
   if (!vehicleId || !officeId || !customerName || !customerEmail || !customerPhone || !preferredDate) {

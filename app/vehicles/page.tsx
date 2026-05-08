@@ -9,6 +9,7 @@ interface SearchParams {
   fuelType?: string;
   transmission?: string;
   maxPrice?: string;
+  city?: string;
   page?: string;
 }
 
@@ -18,9 +19,8 @@ async function VehicleGrid({ searchParams }: { searchParams: SearchParams }) {
   if (searchParams.category) where.category = searchParams.category;
   if (searchParams.fuelType) where.fuelType = searchParams.fuelType;
   if (searchParams.transmission) where.transmission = searchParams.transmission;
-  if (searchParams.maxPrice) {
-    where.pricePerDay = { lte: parseFloat(searchParams.maxPrice) };
-  }
+  if (searchParams.maxPrice) where.pricePerDay = { lte: parseFloat(searchParams.maxPrice) };
+  if (searchParams.city) where.office = { city: searchParams.city };
 
   const vehicles = await prisma.vehicle.findMany({ where, orderBy: { pricePerDay: "asc" } });
 
@@ -62,6 +62,8 @@ export default async function VehiclesPage({
   searchParams: Promise<SearchParams>;
 }) {
   const params = await searchParams;
+  const offices = await prisma.office.findMany({ orderBy: { city: "asc" }, select: { city: true } });
+  const cities = offices.map((o) => o.city);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
@@ -73,7 +75,7 @@ export default async function VehiclesPage({
           <div className="sticky top-20 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
             <h2 className="font-semibold text-gray-900 mb-4">Filtros</h2>
             <Suspense fallback={null}>
-              <VehicleFilters />
+              <VehicleFilters cities={cities} />
             </Suspense>
           </div>
         </div>
