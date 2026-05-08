@@ -7,25 +7,30 @@ import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
 import { Fuel, Gauge, Users, Zap, Calendar, Star, ArrowLeft } from "lucide-react";
 import StarRating from "@/components/StarRating";
-import PurchaseButton from "@/components/PurchaseButton";
-import { auth } from "@clerk/nextjs/server";
+import RequestVisitForm from "@/components/RequestVisitForm";
 
 export default async function SaleDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { userId } = await auth();
 
-  const vehicle = await prisma.vehicle.findUnique({
-    where: { id, forSale: true },
-    include: {
-      reviews: {
-        include: { user: { select: { name: true } } },
-        orderBy: { createdAt: "desc" },
-        take: 6,
+  const [vehicle, offices] = await Promise.all([
+    prisma.vehicle.findUnique({
+      where: { id, forSale: true },
+      include: {
+        office: true,
+        reviews: {
+          include: { user: { select: { name: true } } },
+          orderBy: { createdAt: "desc" },
+          take: 6,
+        },
       },
-    },
-  });
+    }),
+    prisma.office.findMany({ orderBy: { city: "asc" } }),
+  ]);
 
   if (!vehicle) notFound();
+
+  const office = vehicle.office ?? offices[0];
+  if (!office) notFound();
 
   const avgRating =
     vehicle.reviews.length > 0
@@ -100,13 +105,7 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
             <span className="text-3xl font-bold text-green-600">{formatCurrency(Number(vehicle.salePrice))}</span>
           </div>
 
-          {userId ? (
-            <PurchaseButton vehicleId={vehicle.id} />
-          ) : (
-            <Button size="lg" asChild className="w-full">
-              <Link href="/sign-in">Inicia sesión para comprar</Link>
-            </Button>
-          )}
+          <RequestVisitForm vehicleId={vehicle.id} office={office} />
         </div>
       </div>
 

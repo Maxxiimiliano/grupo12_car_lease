@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useRef } from "react";
@@ -13,6 +13,12 @@ import { ImagePlus, Loader2, X } from "lucide-react";
 const CATEGORIES = ["Turismo", "SUV", "Furgoneta", "Deportivo", "Eléctrico", "Compacto"];
 const FUEL_TYPES = ["Gasolina", "Diésel", "Híbrido", "Eléctrico"];
 const TRANSMISSIONS = ["Manual", "Automático"];
+
+interface Office {
+  id: string;
+  name: string;
+  city: string;
+}
 
 export interface VehicleFormData {
   id?: string;
@@ -30,6 +36,7 @@ export interface VehicleFormData {
   mileage: number;
   forSale: boolean;
   salePrice: number;
+  officeId?: string | null;
 }
 
 interface Props {
@@ -46,13 +53,18 @@ export default function VehicleForm({ initialData, onClose }: Props) {
       brand: "", model: "", year: new Date().getFullYear(), pricePerDay: 50,
       category: "Turismo", fuelType: "Gasolina", transmission: "Manual",
       seats: 5, available: true, description: "", imageUrl: "",
-      mileage: 0, forSale: false, salePrice: 0,
+      mileage: 0, forSale: false, salePrice: 0, officeId: null,
     }
   );
+  const [offices, setOffices] = useState<Office[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetch("/api/offices").then((r) => r.json()).then(setOffices).catch(() => {});
+  }, []);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -127,7 +139,12 @@ export default function VehicleForm({ initialData, onClose }: Props) {
         </div>
         <div className="space-y-1">
           <Label>Precio por día (€)</Label>
-          <Input type="number" min={1} step={0.01} value={form.pricePerDay} onChange={(e) => set("pricePerDay", +e.target.value)} required />
+          <Input
+            type="number" min={1} step={0.01}
+            value={form.pricePerDay || ""}
+            onChange={(e) => set("pricePerDay", e.target.value === "" ? 0 : +e.target.value)}
+            required
+          />
         </div>
       </div>
 
@@ -165,18 +182,39 @@ export default function VehicleForm({ initialData, onClose }: Props) {
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
           <Label>Kilometraje (km)</Label>
-          <Input type="number" min={0} value={form.mileage} onChange={(e) => set("mileage", +e.target.value)} required />
+          <Input
+            type="number" min={0}
+            value={form.mileage || ""}
+            onChange={(e) => set("mileage", e.target.value === "" ? 0 : +e.target.value)}
+            required
+          />
         </div>
         <div className="space-y-1">
           <Label>Precio de venta (€)</Label>
           <Input
             type="number" min={0} step={0.01}
-            value={form.salePrice}
-            onChange={(e) => set("salePrice", +e.target.value)}
+            value={form.salePrice || ""}
+            onChange={(e) => set("salePrice", e.target.value === "" ? 0 : +e.target.value)}
             disabled={!form.forSale}
             placeholder={form.forSale ? "Precio de venta" : "Activa 'En venta' primero"}
           />
         </div>
+      </div>
+
+      <div className="space-y-1">
+        <Label>Oficina asignada</Label>
+        <Select
+          value={form.officeId ?? "none"}
+          onValueChange={(v) => set("officeId", v === "none" ? null : v)}
+        >
+          <SelectTrigger><SelectValue placeholder="Sin oficina" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">Sin oficina</SelectItem>
+            {offices.map((o) => (
+              <SelectItem key={o.id} value={o.id}>{o.name} – {o.city}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-1">

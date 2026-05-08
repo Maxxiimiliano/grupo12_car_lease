@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
-import { Fuel, Users, Zap, Calendar, Star } from "lucide-react";
+import { Fuel, Gauge, MapPin, Users, Zap, Calendar, Star } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import ReservationForm from "@/components/ReservationForm";
 import StarRating from "@/components/StarRating";
@@ -13,6 +13,7 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
   const vehicle = await prisma.vehicle.findUnique({
     where: { id },
     include: {
+      office: true,
       reviews: {
         include: { user: { select: { name: true, avatarUrl: true } } },
         orderBy: { createdAt: "desc" },
@@ -74,6 +75,7 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
               { icon: Zap, label: "Transmisión", value: vehicle.transmission },
               { icon: Users, label: "Plazas", value: `${vehicle.seats} asientos` },
               { icon: Calendar, label: "Año", value: String(vehicle.year) },
+              { icon: Gauge, label: "Kilometraje", value: `${vehicle.mileage.toLocaleString("es-ES")} km` },
             ].map(({ icon: Icon, label, value }) => (
               <div key={label} className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2">
                 <Icon className="h-4 w-4 text-blue-500 shrink-0" />
@@ -84,6 +86,16 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
               </div>
             ))}
           </div>
+
+          {vehicle.office && (
+            <div className="rounded-xl bg-gray-50 border border-gray-200 p-4 text-sm space-y-1">
+              <p className="font-semibold text-gray-700 flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-blue-500 shrink-0" /> Punto de recogida
+              </p>
+              <p className="text-gray-600 pl-6">{vehicle.office.name}</p>
+              <p className="text-gray-400 pl-6">{vehicle.office.address}, {vehicle.office.city}</p>
+            </div>
+          )}
 
           <div className="rounded-xl bg-blue-50 p-4 flex items-center justify-between">
             <span className="text-gray-600 text-sm">Precio por día</span>

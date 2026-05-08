@@ -36,6 +36,19 @@ model User {
   reviews      Review[]
 }
 
+model Office {
+  id        String    @id @default(cuid())
+  name      String
+  address   String
+  city      String
+  phone     String
+  email     String
+  lat       Float
+  lng       Float
+  createdAt DateTime  @default(now())
+  vehicles  Vehicle[]
+}
+
 model Vehicle {
   id           String        @id @default(cuid())
   brand        String
@@ -52,6 +65,8 @@ model Vehicle {
   mileage      Int           @default(0)
   forSale      Boolean       @default(false)
   salePrice    Decimal?      @db.Decimal(10, 2)
+  officeId     String?
+  office       Office?       @relation(fields: [officeId], references: [id])
   updatedAt    DateTime      @updatedAt
   reservations Reservation[]
   reviews      Review[]

@@ -26,6 +26,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       mileage: data.mileage ?? 0,
       forSale: data.forSale ?? false,
       salePrice: data.forSale && data.salePrice ? data.salePrice : null,
+      officeId: data.officeId || null,
     },
   });
   return NextResponse.json(vehicle);

@@ -5,7 +5,7 @@ import AdminVehicleActions from "@/components/admin/AdminVehicleActions";
 import AdminVehicleCreateButton from "@/components/admin/AdminVehicleCreateButton";
 
 export default async function AdminVehiclesPage() {
-  const vehicles = await prisma.vehicle.findMany({ orderBy: { brand: "asc" } });
+  const vehicles = await prisma.vehicle.findMany({ orderBy: { brand: "asc" }, include: { office: true } });
 
   return (
     <div className="space-y-6">
@@ -46,6 +46,7 @@ export default async function AdminVehiclesPage() {
                       fuelType: v.fuelType, transmission: v.transmission, seats: v.seats,
                       available: v.available, description: v.description, imageUrl: v.imageUrl,
                       mileage: v.mileage, forSale: v.forSale, salePrice: Number(v.salePrice ?? 0),
+                      officeId: v.officeId,
                     }} />
                   </td>
                 </tr>

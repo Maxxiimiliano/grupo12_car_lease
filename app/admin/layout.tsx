@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { BarChart3, Car, Users } from "lucide-react";
+import { BarChart3, Car, MapPin, Users } from "lucide-react";
 
 const adminNav = [
   { href: "/admin", label: "Dashboard", icon: BarChart3 },
   { href: "/admin/vehicles", label: "Vehículos", icon: Car },
+  { href: "/admin/offices", label: "Oficinas", icon: MapPin },
   { href: "/admin/users", label: "Usuarios", icon: Users },
 ];
 
