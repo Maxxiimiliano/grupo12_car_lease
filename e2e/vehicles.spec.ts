@@ -10,7 +10,6 @@ test.describe("Catálogo de vehículos", () => {
   });
 
   test("muestra vehículos en la cuadrícula", async ({ page }) => {
-    // Wait for at least one vehicle card to appear
     const cards = page.locator("a[href^='/vehicles/']");
     await expect(cards.first()).toBeVisible({ timeout: 10000 });
     const count = await cards.count();
@@ -18,7 +17,8 @@ test.describe("Catálogo de vehículos", () => {
   });
 
   test("muestra el panel de filtros", async ({ page }) => {
-    await expect(page.getByText("Filtros")).toBeVisible();
+    // Use heading role to avoid matching 'Limpiar filtros' button
+    await expect(page.getByRole("heading", { name: "Filtros" })).toBeVisible();
     await expect(page.getByPlaceholder("Marca o modelo...")).toBeVisible();
     await expect(page.getByText("Ciudad / Oficina")).toBeVisible();
     await expect(page.getByText("Categoría")).toBeVisible();
@@ -33,7 +33,6 @@ test.describe("Catálogo de vehículos", () => {
     const cards = page.locator("a[href^='/vehicles/']");
     await expect(cards.first()).toBeVisible();
 
-    // All visible brand names should contain BMW
     const brandTexts = await page.locator("h3.font-semibold").allTextContents();
     const allMatchBMW = brandTexts.every((t) => t.toLowerCase().includes("bmw"));
     expect(allMatchBMW).toBe(true);

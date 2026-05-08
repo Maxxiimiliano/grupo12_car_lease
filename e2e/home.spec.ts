@@ -10,15 +10,14 @@ test.describe("Página de inicio", () => {
   });
 
   test("muestra las estadísticas en la barra de stats", async ({ page }) => {
-    const statsStrip = page.locator("text=vehículos disponibles");
-    await expect(statsStrip).toBeVisible();
-    await expect(page.locator("text=ciudades")).toBeVisible();
-    await expect(page.locator("text=Desde")).toBeVisible();
+    // Use first() because the text 'vehículos disponibles' also appears in the features section
+    await expect(page.locator("text=vehículos disponibles").first()).toBeVisible();
+    await expect(page.locator("text=ciudades").first()).toBeVisible();
+    await expect(page.locator("text=Desde").first()).toBeVisible();
   });
 
   test("muestra la sección de vehículos más valorados", async ({ page }) => {
     await expect(page.getByRole("heading", { name: "Más valorados" })).toBeVisible();
-    // Should show at least one vehicle card
     const vehicleCards = page.locator("a[href^='/vehicles/']");
     await expect(vehicleCards.first()).toBeVisible();
   });
@@ -30,6 +29,7 @@ test.describe("Página de inicio", () => {
   });
 
   test("el botón 'Ver vehículos' navega al catálogo", async ({ page }) => {
+    // Use first() — the hero CTA and the top-vehicles section both link to /vehicles
     await page.getByRole("link", { name: /Ver vehículos/i }).first().click();
     await expect(page).toHaveURL("/vehicles");
   });
@@ -41,7 +41,8 @@ test.describe("Página de inicio", () => {
 
   test("el logo CarLease navega al inicio", async ({ page }) => {
     await page.goto("/vehicles");
-    await page.getByRole("link", { name: "CarLease" }).click();
+    // first() — desktop nav and mobile nav both render the logo link
+    await page.getByRole("link", { name: "CarLease" }).first().click();
     await expect(page).toHaveURL("/");
   });
 });
