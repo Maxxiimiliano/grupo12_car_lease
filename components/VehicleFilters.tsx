@@ -37,6 +37,19 @@ export default function VehicleFilters({ cities }: Props) {
 
   return (
     <aside className="space-y-5 w-full">
+      <div className="space-y-1.5">
+        <Label>Buscar</Label>
+        <Input
+          type="text"
+          placeholder="Marca o modelo..."
+          defaultValue={searchParams.get("search") ?? ""}
+          onBlur={(e) => updateParam("search", e.target.value)}
+          onKeyDown={(e) =>
+            e.key === "Enter" && updateParam("search", (e.target as HTMLInputElement).value)
+          }
+        />
+      </div>
+
       {cities.length > 0 && (
         <div className="space-y-1.5">
           <Label>Ciudad / Oficina</Label>

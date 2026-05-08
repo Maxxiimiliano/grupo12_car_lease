@@ -10,6 +10,7 @@ interface SearchParams {
   transmission?: string;
   maxPrice?: string;
   city?: string;
+  search?: string;
   page?: string;
 }
 
@@ -21,6 +22,12 @@ async function VehicleGrid({ searchParams }: { searchParams: SearchParams }) {
   if (searchParams.transmission) where.transmission = searchParams.transmission;
   if (searchParams.maxPrice) where.pricePerDay = { lte: parseFloat(searchParams.maxPrice) };
   if (searchParams.city) where.office = { city: searchParams.city };
+  if (searchParams.search) {
+    where.OR = [
+      { brand: { contains: searchParams.search, mode: "insensitive" } },
+      { model: { contains: searchParams.search, mode: "insensitive" } },
+    ];
+  }
 
   const vehicles = await prisma.vehicle.findMany({ where, orderBy: { pricePerDay: "asc" } });
 

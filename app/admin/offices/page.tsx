@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { Mail, MapPin, Phone } from "lucide-react";
+import AdminOfficeActions from "@/components/admin/AdminOfficeActions";
+import AdminOfficeCreateButton from "@/components/admin/AdminOfficeCreateButton";
 
 export default async function AdminOfficesPage() {
   const offices = await prisma.office.findMany({
@@ -11,31 +12,42 @@ export default async function AdminOfficesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Oficinas</h1>
+        <AdminOfficeCreateButton />
       </div>
 
-      <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
-        {offices.map((office) => (
-          <div key={office.id} className="rounded-xl border border-gray-200 bg-white p-5 space-y-3">
-            <div>
-              <h2 className="font-semibold text-gray-900">{office.name}</h2>
-              <p className="text-sm text-blue-600">{office.city}</p>
-            </div>
-            <div className="space-y-1.5 text-sm text-gray-600">
-              <p className="flex items-start gap-2">
-                <MapPin className="h-4 w-4 text-gray-400 shrink-0 mt-0.5" />{office.address}
-              </p>
-              <p className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-gray-400 shrink-0" />{office.phone}
-              </p>
-              <p className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-gray-400 shrink-0" />{office.email}
-              </p>
-            </div>
-            <p className="text-xs text-gray-400 pt-1 border-t border-gray-100">
-              {office._count.vehicles} vehículo{office._count.vehicles !== 1 ? "s" : ""} asignado{office._count.vehicles !== 1 ? "s" : ""}
-            </p>
-          </div>
-        ))}
+      <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Oficina</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Ciudad</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Contacto</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Vehículos</th>
+                <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {offices.map((o) => (
+                <tr key={o.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-3 font-medium text-gray-900">{o.name}</td>
+                  <td className="px-4 py-3 text-gray-600">{o.city}</td>
+                  <td className="px-4 py-3 text-gray-600">
+                    <p>{o.phone}</p>
+                    <p className="text-xs text-gray-400">{o.email}</p>
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">{o._count.vehicles}</td>
+                  <td className="px-4 py-3 text-right">
+                    <AdminOfficeActions office={{
+                      id: o.id, name: o.name, address: o.address, city: o.city,
+                      phone: o.phone, email: o.email, lat: o.lat, lng: o.lng,
+                    }} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

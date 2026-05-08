@@ -43,7 +43,10 @@ export default async function MyReservationsPage() {
           {reservations.map((r) => {
             const { label, variant } = statusMap[r.status];
             const canCancel = r.status === "PENDING" || r.status === "CONFIRMED";
-            const canReview = r.status === "CONFIRMED" && r.reviews.length === 0;
+            const canReview =
+              r.status === "CONFIRMED" &&
+              r.reviews.length === 0 &&
+              new Date(r.endDate) < new Date();
 
             return (
               <div key={r.id} className="rounded-xl border border-gray-200 bg-white p-5">
