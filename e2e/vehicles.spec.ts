@@ -51,16 +51,12 @@ test.describe("Catálogo de vehículos", () => {
     await expect(page).toHaveURL("/vehicles");
   });
 
-  test("el clic en una tarjeta navega al detalle del vehículo", async ({ page }) => {
+  test("el clic en una tarjeta navega al detalle con información correcta", async ({ page }) => {
     const firstCard = page.locator("a[href^='/vehicles/']").first();
+    await expect(firstCard).toBeVisible({ timeout: 10000 });
     const href = await firstCard.getAttribute("href");
     await firstCard.click();
     await expect(page).toHaveURL(href!);
-  });
-
-  test("la página de detalle muestra la información del vehículo", async ({ page }) => {
-    const firstCard = page.locator("a[href^='/vehicles/']").first();
-    await firstCard.click();
 
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await expect(page.getByText("Combustible")).toBeVisible();
