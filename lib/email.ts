@@ -1,6 +1,14 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
 interface VisitRequestData {
   vehicleName: string;
@@ -15,14 +23,14 @@ interface VisitRequestData {
 }
 
 export async function sendVisitRequest(data: VisitRequestData) {
-  const adminEmail = process.env.ADMIN_EMAIL || "admin@carlease.es";
+  const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER!;
   const vehicleUrl = `${process.env.NEXT_PUBLIC_APP_URL}/sale/${data.vehicleId}`;
 
-  await resend.emails.send({
-    from: "CarLease <onboarding@resend.dev>",
+  await transporter.sendMail({
+    from: `"CarLease" <${process.env.EMAIL_USER}>`,
     to: adminEmail,
     replyTo: data.customerEmail,
-    subject: `🚗 Solicitud de visita – ${data.vehicleName}`,
+    subject: `Solicitud de visita – ${data.vehicleName}`,
     html: `
       <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#fff;">
         <h1 style="color:#16a34a;font-size:22px;margin-bottom:8px;">Nueva solicitud de visita</h1>
@@ -52,20 +60,20 @@ export async function sendVisitRequest(data: VisitRequestData) {
     `,
   });
 
-  await resend.emails.send({
-    from: "CarLease <onboarding@resend.dev>",
+  await transporter.sendMail({
+    from: `"CarLease" <${process.env.EMAIL_USER}>`,
     to: data.customerEmail,
-    subject: "✅ Solicitud de visita recibida – CarLease",
+    subject: "Solicitud de visita recibida – CarLease",
     html: `
       <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#fff;">
         <h1 style="color:#16a34a;font-size:22px;margin-bottom:8px;">¡Solicitud recibida!</h1>
         <p style="color:#4b5563;margin-bottom:24px;">Hola ${data.customerName}, hemos recibido tu solicitud para visitar el <strong>${data.vehicleName}</strong>.</p>
         <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:24px;">
-          <p style="margin:0;color:#374151;">📍 <strong>${data.officeName}</strong></p>
+          <p style="margin:0;color:#374151;"><strong>${data.officeName}</strong></p>
           <p style="margin:4px 0 0;color:#6b7280;font-size:14px;">${data.officeAddress}</p>
-          <p style="margin:12px 0 0;color:#374151;">📅 Fecha preferida: <strong>${data.preferredDate}</strong></p>
+          <p style="margin:12px 0 0;color:#374151;">Fecha preferida: <strong>${data.preferredDate}</strong></p>
         </div>
-        <p style="color:#6b7280;margin-top:20px;font-size:14px;">Nuestro equipo se pondrá en contacto contigo para confirmar la cita. Responde a este email si tienes alguna pregunta.</p>
+        <p style="color:#6b7280;margin-top:20px;font-size:14px;">Nuestro equipo se pondrá en contacto contigo para confirmar la cita.</p>
         <p style="color:#9ca3af;font-size:12px;margin-top:32px;">CarLease · DAM Grupo 12</p>
       </div>
     `,
@@ -85,10 +93,10 @@ interface ReservationEmailData {
 export async function sendReservationConfirmation(data: ReservationEmailData) {
   const { to, customerName, vehicleName, startDate, endDate, totalPrice, reservationId } = data;
 
-  await resend.emails.send({
-    from: "CarLease <onboarding@resend.dev>",
+  await transporter.sendMail({
+    from: `"CarLease" <${process.env.EMAIL_USER}>`,
     to,
-    subject: "✅ Reserva confirmada – CarLease",
+    subject: "Reserva confirmada – CarLease",
     html: `
       <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#fff;">
         <h1 style="color:#2563eb;font-size:24px;margin-bottom:8px;">¡Reserva confirmada!</h1>
