@@ -33,12 +33,12 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
       <div className="grid lg:grid-cols-2 gap-10">
         {/* Image */}
-        <div className="relative h-80 lg:h-full min-h-[320px] rounded-2xl overflow-hidden bg-gray-100">
+        <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gray-100">
           <Image
             src={vehicle.imageUrl || "/placeholder-car.jpg"}
             alt={`${vehicle.brand} ${vehicle.model}`}
             fill
-            className="object-contain"
+            className="object-cover"
             priority
           />
         </div>
