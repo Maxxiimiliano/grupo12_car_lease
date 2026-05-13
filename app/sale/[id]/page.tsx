@@ -44,16 +44,18 @@ export default async function SaleDetailPage({ params }: { params: Promise<{ id:
       </Link>
 
       <div className="grid lg:grid-cols-2 gap-10">
-        <div className="relative h-80 lg:h-full min-h-[320px] rounded-2xl overflow-hidden bg-gray-100">
-          <Image
-            src={vehicle.imageUrl || "/placeholder-car.jpg"}
-            alt={`${vehicle.brand} ${vehicle.model}`}
-            fill
-            className="object-cover"
-            priority
-          />
-          <div className="absolute top-3 left-3">
-            <Badge className="bg-green-600 text-white text-sm px-3 py-1">En venta</Badge>
+        <div className="lg:sticky lg:top-24 lg:self-start">
+          <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-gray-100">
+            <Image
+              src={vehicle.imageUrl || "/placeholder-car.jpg"}
+              alt={`${vehicle.brand} ${vehicle.model}`}
+              fill
+              className="object-cover"
+              priority
+            />
+            <div className="absolute top-3 left-3">
+              <Badge className="bg-green-600 text-white text-sm px-3 py-1">En venta</Badge>
+            </div>
           </div>
         </div>
 
