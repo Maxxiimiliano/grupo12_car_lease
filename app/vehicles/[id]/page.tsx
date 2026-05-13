@@ -102,6 +102,13 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
             <span className="text-3xl font-bold text-blue-600">{formatCurrency(Number(vehicle.pricePerDay))}</span>
           </div>
 
+          {process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.startsWith("pk_test_") && (
+            <div className="rounded-xl border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+              <p className="font-semibold mb-1">Modo de prueba</p>
+              <p>Usa la tarjeta <span className="font-mono font-bold tracking-wider">4242 4242 4242 4242</span> con cualquier fecha futura y cualquier CVC.</p>
+            </div>
+          )}
+
           <ReservationForm vehicleId={vehicle.id} pricePerDay={Number(vehicle.pricePerDay)} available={vehicle.available} />
         </div>
       </div>

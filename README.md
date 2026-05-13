@@ -15,7 +15,7 @@ Aplicación web de alquiler y venta de vehículos — Proyecto Final DAM Grupo 1
 | Base de datos | PostgreSQL (Neon Serverless) + Prisma ORM v7 |
 | Autenticación | Clerk v7 |
 | Pagos | Stripe (Checkout Sessions + Webhooks) |
-| Email | Resend |
+| Email | Nodemailer + Gmail SMTP |
 | Imágenes | Cloudinary |
 | Despliegue | Vercel |
 | Tests | Playwright (E2E) |
@@ -50,7 +50,7 @@ Aplicación web de alquiler y venta de vehículos — Proyecto Final DAM Grupo 1
 - Cuenta en [Neon](https://neon.tech) (PostgreSQL serverless)
 - Cuenta en [Clerk](https://clerk.com)
 - Cuenta en [Stripe](https://stripe.com)
-- Cuenta en [Resend](https://resend.com)
+- Cuenta de Gmail con [contraseña de aplicación](https://myaccount.google.com/apppasswords)
 - Cuenta en [Cloudinary](https://cloudinary.com)
 
 ### 1. Clonar el repositorio
@@ -78,7 +78,8 @@ cp .env.example .env.local
 | `STRIPE_SECRET_KEY` | Clave secreta de Stripe |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Clave pública de Stripe |
 | `STRIPE_WEBHOOK_SECRET` | Secret del webhook de Stripe |
-| `RESEND_API_KEY` | API key de Resend |
+| `EMAIL_USER` | Cuenta Gmail para envío de emails |
+| `EMAIL_PASS` | Contraseña de aplicación de Gmail |
 | `ADMIN_EMAIL` | Email que recibe solicitudes de visita |
 | `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` | Nombre del cloud de Cloudinary |
 | `NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET` | Upload preset de Cloudinary |
@@ -120,6 +121,21 @@ stripe listen --forward-to localhost:3000/api/webhooks/stripe
 
 # Clerk: configura el webhook en el Dashboard de Clerk apuntando a tu URL de ngrok
 ```
+
+---
+
+## Pruebas de pago
+
+La aplicación usa Stripe en **modo test**. Para simular un pago completado usa los siguientes datos en la pantalla de pago de Stripe:
+
+| Campo | Valor |
+|-------|-------|
+| Número de tarjeta | `4242 4242 4242 4242` |
+| Fecha de caducidad | Cualquier fecha futura (ej. `12/30`) |
+| CVC | Cualquier número de 3 dígitos (ej. `123`) |
+| Nombre | Cualquiera |
+
+No se realizará ningún cargo real. El aviso también aparece en la propia ficha del vehículo justo antes del formulario de reserva.
 
 ---
 
@@ -173,7 +189,7 @@ components/
   admin/            # Componentes del panel admin
   ui/               # Primitivos de UI (Button, Card, Badge…)
 lib/
-  email.ts          # Envío de emails con Resend
+  email.ts          # Envío de emails con Nodemailer
   prisma.ts         # Singleton de Prisma
   stripe.ts         # Singleton de Stripe
   utils.ts          # Utilidades (formatCurrency, formatDate…)
