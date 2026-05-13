@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
+import { DayPicker, type DateRange } from "react-day-picker";
+import { es } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { formatCurrency, diffInDays } from "@/lib/utils";
 import { CalendarDays, Loader2 } from "lucide-react";
+import "react-day-picker/style.css";
 
 interface Props {
   vehicleId: string;
@@ -15,25 +16,49 @@ interface Props {
   available: boolean;
 }
 
+interface BookedRange {
+  startDate: string;
+  endDate: string;
+}
+
 export default function ReservationForm({ vehicleId, pricePerDay, available }: Props) {
   const { isSignedIn } = useUser();
   const router = useRouter();
 
-  const today = new Date().toISOString().split("T")[0];
-
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [range, setRange] = useState<DateRange | undefined>();
+  const [bookedRanges, setBookedRanges] = useState<BookedRange[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const days = startDate && endDate ? diffInDays(new Date(startDate), new Date(endDate)) : 0;
+  useEffect(() => {
+    fetch(`/api/vehicles/${vehicleId}/booked-dates`)
+      .then((r) => r.json())
+      .then(setBookedRanges)
+      .catch(() => {});
+  }, [vehicleId]);
+
+  const disabledDays = [
+    { before: new Date() },
+    ...bookedRanges.map(({ startDate, endDate }) => ({
+      from: new Date(startDate),
+      to: new Date(endDate),
+    })),
+  ];
+
+  const bookedModifier = bookedRanges.map(({ startDate, endDate }) => ({
+    from: new Date(startDate),
+    to: new Date(endDate),
+  }));
+
+  const startDate = range?.from;
+  const endDate = range?.to;
+  const days = startDate && endDate ? diffInDays(startDate, endDate) : 0;
   const total = days * pricePerDay;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isSignedIn) { router.push("/sign-in"); return; }
     if (!startDate || !endDate) { setError("Selecciona las fechas de inicio y fin."); return; }
-    if (new Date(startDate) >= new Date(endDate)) { setError("La fecha de fin debe ser posterior a la de inicio."); return; }
     setError("");
     setLoading(true);
 
@@ -41,7 +66,11 @@ export default function ReservationForm({ vehicleId, pricePerDay, available }: P
       const res = await fetch("/api/reservations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ vehicleId, startDate, endDate }),
+        body: JSON.stringify({
+          vehicleId,
+          startDate: startDate.toISOString().split("T")[0],
+          endDate: endDate.toISOString().split("T")[0],
+        }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Error al crear la reserva."); return; }
@@ -61,30 +90,33 @@ export default function ReservationForm({ vehicleId, pricePerDay, available }: P
         <CalendarDays className="h-5 w-5 text-blue-500" /> Selecciona las fechas
       </h3>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-1">
-          <Label htmlFor="startDate">Fecha inicio</Label>
-          <Input
-            id="startDate"
-            type="date"
-            min={today}
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            required
-          />
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="endDate">Fecha fin</Label>
-          <Input
-            id="endDate"
-            type="date"
-            min={startDate || today}
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            required
-          />
-        </div>
+      <div className="flex justify-center">
+        <DayPicker
+          mode="range"
+          selected={range}
+          onSelect={setRange}
+          locale={es}
+          disabled={disabledDays}
+          modifiers={{ booked: bookedModifier }}
+          modifiersStyles={{
+            booked: {
+              backgroundColor: "#fee2e2",
+              color: "#dc2626",
+              textDecoration: "line-through",
+            },
+          }}
+          styles={{
+            root: { fontSize: "0.875rem" },
+          }}
+        />
       </div>
+
+      {bookedRanges.length > 0 && (
+        <p className="text-xs text-gray-400 flex items-center gap-1">
+          <span className="inline-block h-3 w-3 rounded-sm bg-red-100 border border-red-300" />
+          Días en rojo: no disponibles
+        </p>
+      )}
 
       {days > 0 && (
         <div className="rounded-lg bg-gray-50 p-3 text-sm flex justify-between">
