@@ -38,7 +38,7 @@ export default async function VehicleDetailPage({ params }: { params: Promise<{ 
             src={vehicle.imageUrl || "/placeholder-car.jpg"}
             alt={`${vehicle.brand} ${vehicle.model}`}
             fill
-            className="object-cover"
+            className="object-contain"
             priority
           />
         </div>
